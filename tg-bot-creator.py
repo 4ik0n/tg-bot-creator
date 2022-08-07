@@ -1,4 +1,4 @@
-﻿from aiogram import Bot, types
+from aiogram import Bot, types
 from aiogram.dispatcher import Dispatcher
 import os
 import random
@@ -27,6 +27,15 @@ class FSMAdmin(StatesGroup):
     photo = State()
     discription = State()
 
+@dp.message_handler(commands='отмена', state=[FSMAdmin.photo, FSMAdmin])
+async def cancel_handler(message: types.Message, state: FSMContext):
+    print(state)
+    current_state = await state.get_state()
+    if (current_state is None):
+        return
+    await state.finish()
+    await message.reply('OK')
+
 @dp.message_handler(commands='Загрузить', state=None)
 async def cm_start(message : types.Message):
     await FSMAdmin.photo.set()
@@ -47,16 +56,6 @@ async def load_discription(message: types.Message, state: FSMContext):
         date_photo.append(data['photo'])
         date_text.append(data['discription'])
     await cm_start(message)
-
-@dp.message_handler(commands='отмена')
-@dp.message_handler(Text(equals='отмена', ignore_case=True))
-async def cancel_handler(message : types.Message, state: FSMContext):
-    current_state = await state.get_state()
-    if (current_state is None):
-        return
-    await state.finish()
-
-
 
 @dp.message_handler(commands='Лента')
 async def lenta(message : types.Message):
